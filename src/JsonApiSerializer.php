@@ -1,4 +1,6 @@
 <?php
+/** @noinspection ClassOverridesFieldOfSuperClassInspection */
+
 /**
  * Author: Nil Portugués Calderó <contact@nilportugues.com>
  * Date: 11/21/15
@@ -33,9 +35,10 @@ class JsonApiSerializer extends DeepCopySerializer
     }
 
     /**
+     * @noinspection SenselessMethodDuplicationInspection
      * @return JsonApiTransformer
      */
-    public function getTransformer()
+    public function getTransformer(): JsonApiTransformer
     {
         return $this->serializationStrategy;
     }
@@ -47,7 +50,7 @@ class JsonApiSerializer extends DeepCopySerializer
      *
      * @return string
      */
-    public function serialize($value, Fields $fields = null, Included $included = null)
+    public function serialize($value, Fields $fields = null, Included $included = null): string
     {
         if (null !== $fields) {
             $this->filterOutResourceFields($fields);
@@ -69,7 +72,7 @@ class JsonApiSerializer extends DeepCopySerializer
             foreach ($included->get() as $resource => $includeData) {
                 foreach ($this->serializationStrategy->getMappings() as $mapping) {
                     $mapping->filteringIncludedResources(true);
-                    if (is_array($includeData)) {
+                    if (\is_array($includeData)) {
                         foreach ($includeData as $subResource) {
                             $this->serializationStrategy->getMappingByAlias($subResource)->addIncludedResource(
                                 $this->serializationStrategy->getMappingByAlias($resource)->getClassName()

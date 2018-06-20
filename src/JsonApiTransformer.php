@@ -41,7 +41,7 @@ class JsonApiTransformer extends Transformer
      *
      * @return string
      */
-    public function serialize($value)
+    public function serialize($value):string
     {
         $this->noMappingGuard();
 
@@ -59,7 +59,7 @@ class JsonApiTransformer extends Transformer
      *
      * @return array
      */
-    protected function serializeObject(array $value)
+    protected function serializeObject(array $value): array
     {
         $value = $this->transformUnmappedObjectsToArray($value);
         $value = $this->preSerialization($value);
@@ -73,7 +73,7 @@ class JsonApiTransformer extends Transformer
      *
      * @return array
      */
-    protected function preSerialization(array $value)
+    protected function preSerialization(array $value): array
     {
         /** @var \NilPortugues\Api\Mapping\Mapping $mapping */
         foreach ($this->mappings as $class => $mapping) {
@@ -91,7 +91,7 @@ class JsonApiTransformer extends Transformer
      *
      * @return array
      */
-    protected function serialization(array &$value)
+    protected function serialization(array &$value): array
     {
         $data = [
             self::DATA_KEY => \array_merge(
@@ -120,7 +120,7 @@ class JsonApiTransformer extends Transformer
         $data[self::LINKS_KEY] = \array_filter(
             \array_merge(
                 $this->addHrefToLinks($this->buildLinks()),
-                (!empty($data[self::LINKS_KEY])) ? $data[self::LINKS_KEY] : []
+                !empty($data[self::LINKS_KEY]) ? $data[self::LINKS_KEY] : []
             )
         );
 
@@ -132,8 +132,8 @@ class JsonApiTransformer extends Transformer
 
                 $data[self::LINKS_KEY] = \array_filter(
                     \array_merge(
-                        (empty($data[self::LINKS_KEY])) ? [] : $data[self::LINKS_KEY],
-                        (!empty($urls)) ? $this->addHrefToLinks($this->getResponseAdditionalLinks($value, $type)) : []
+                        empty($data[self::LINKS_KEY]) ? [] : $data[self::LINKS_KEY],
+                        !empty($urls) ? $this->addHrefToLinks($this->getResponseAdditionalLinks($value, $type)) : []
                     )
                 );
 
@@ -152,6 +152,7 @@ class JsonApiTransformer extends Transformer
                     $this->mappings[$type]->getResourceUrl(),
                     $type
                 );
+                /** @noinspection TypeUnsafeComparisonInspection */
                 if ($href != $this->mappings[$type]->getResourceUrl()) {
                     $data[self::LINKS_KEY][self::SELF_LINK][self::LINKS_HREF] = $href;
                 }
@@ -186,7 +187,7 @@ class JsonApiTransformer extends Transformer
      *
      * @return array
      */
-    protected function postSerialization(array $data)
+    protected function postSerialization(array $data): array
     {
         $this->formatScalarValues($data);
         RecursiveDeleteHelper::deleteKeys($data, [Serializer::CLASS_IDENTIFIER_KEY]);
@@ -205,6 +206,7 @@ class JsonApiTransformer extends Transformer
         foreach ($aliases as &$alias) {
             $alias = DataAttributesHelper::transformToValidMemberName($alias);
         }
+        unset($alias);
         $mapping->setPropertyNameAliases($aliases);
     }
 
@@ -213,7 +215,7 @@ class JsonApiTransformer extends Transformer
      *
      * @return array
      */
-    protected function serializedArray(array $value)
+    protected function serializedArray(array $value): array
     {
         unset($value[Serializer::MAP_TYPE]);
 
@@ -224,6 +226,7 @@ class JsonApiTransformer extends Transformer
             $v = $this->serializeObject($v);
             $dataValues[] = $v[self::DATA_KEY];
             if (!empty($v[self::INCLUDED_KEY])) {
+                /** @noinspection SlowArrayOperationsInLoopInspection */
                 $includedValues = \array_merge($includedValues, $v[self::INCLUDED_KEY]);
             }
         }
@@ -238,7 +241,7 @@ class JsonApiTransformer extends Transformer
         $this->setResponseVersion($data);
         $this->setResponseMeta($data);
 
-        return (empty($data['data'])) ? array_merge(['data' => []], $data) : $data;
+        return empty($data['data']) ? array_merge(['data' => []], $data) : $data;
     }
 
     /**
@@ -246,7 +249,7 @@ class JsonApiTransformer extends Transformer
      *
      * @return array
      */
-    protected function transformUnmappedObjectsToArray(array $value)
+    protected function transformUnmappedObjectsToArray(array $value): array
     {
         return RecursiveRenamerHelper::serializedObjectToArray($value, $this->mappings);
     }
